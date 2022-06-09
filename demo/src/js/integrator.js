@@ -19,6 +19,7 @@ const defaultConfig = {
   },
 };
 const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
+
 function initPlayer(element) {
   fetch('./src/js/playlist.json')
     .then((data) => {
@@ -34,7 +35,7 @@ function initPlayer(element) {
             const hls = new Hls();
             hls.loadSource(playlist[0].sources[0].src);
             hls.attachMedia(element);
-            hls.on(Hls.Events.MANIFEST_PARSED,function() {
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
               element.play();
             });
           }
@@ -47,6 +48,7 @@ function initPlayer(element) {
       }
     });
 }
+
 function loadScript(url) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -57,6 +59,7 @@ function loadScript(url) {
     (document.body || document.head || document.documentElement).appendChild(s);
   });
 }
+
 function initDom(container) {
   if (container == null) return;
   const prefix = 'bidmatic-';
