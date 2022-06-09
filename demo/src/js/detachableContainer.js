@@ -2,20 +2,22 @@ const DETACH_STATES = {
   init: 0,
   ready: 1,
   detached: 2,
+  closed: 3,
 };
 
 class Detachable {
   constructor(element) {
-    this.container = element;
+    let container = element;
     if (typeof element === 'string') {
-      this.container = document.querySelector(element);
+      container = document.querySelector(element);
     }
-    if (this.container == null) {
+    if (container == null) {
       throw new Error('unknown element', element);
     }
-    this.container.className += 'plyr__detachable';
+    this.container = container;
     this.currentState = DETACH_STATES.init;
     this.containerPrevStyles = {};
+    this.injectCloseButton();
     this.initObserver();
   }
 
@@ -30,9 +32,23 @@ class Detachable {
     this.intersectionObserver.observe(this.container.parentNode);
   }
 
+  injectCloseButton() {
+    this.closeBtn = document.createElement('div');
+    this.closeBtn.className = 'close';
+    this.container.appendChild(this.closeBtn);
+    this.closeBtn.addEventListener('click', this.close.bind(this));
+    this.closeBtn.addEventListener('ontouchend', this.close.bind(this));
+  }
+
+  close() {
+    this.becomeVisible();
+    this.currentState = DETACH_STATES.closed;
+    this.intersectionObserver.unobserve(this.container.parentNode);
+  }
+
   intersectionCallback(entries) {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
+      if (entry.intersectionRatio > 0.5) {
         this.becomeVisible();
       } else {
         this.becomeInvisible();
@@ -45,9 +61,9 @@ class Detachable {
 
   becomeVisible() {
     if (this.currentState === DETACH_STATES.ready) {
-      this.onContainerVisible();
       return;
     }
+    this.onContainerVisible();
     this.restoreContainerSize();
     this.currentState = DETACH_STATES.ready;
     this.container.className = this.container.className.replace(' detached', '');

@@ -203,6 +203,7 @@ gulp.task('sprites', gulp.parallel(...tasks.sprite));
 
 // Watch for file changes
 gulp.task('watch', () => {
+  console.log(123123123)
   // Plyr core
   gulp.watch(paths.plyr.src.js, gulp.parallel('js'));
   gulp.watch(paths.plyr.src.sass, gulp.parallel('css'));
@@ -222,6 +223,7 @@ gulp.task('serve', () =>
     notify: false,
     watch: true,
     ghostMode: false,
+    injectChanges: false,
   }),
 );
 
