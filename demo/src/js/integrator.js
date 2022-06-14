@@ -1,6 +1,6 @@
-import Plyr from '../../../src/js/plyr';
 import Detachable from './detachableContainer';
 
+const HOST = window.location.href.indexOf('localhost:3000') > -1 ? './dist/' : 'https://player.adtcdn.com/microplayer/';
 let inited = false;
 
 function createElement(opts) {
@@ -20,35 +20,6 @@ const defaultConfig = {
 };
 const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
 
-function initPlayer(element) {
-  fetch('./src/js/playlist.json')
-    .then((data) => {
-      return data.json();
-    })
-    .then((playlist) => {
-      const config = { ...defaultConfig };
-      config.ads.tagUrl = playlist[0].ads[0];
-
-      if (playlist[0].sources[0].type === 'application/x-mpegURL') {
-        loadScript(HLS_URL).then(() => {
-          if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(playlist[0].sources[0].src);
-            hls.attachMedia(element);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              element.play();
-            });
-          }
-          new Plyr(element, config);
-        });
-      } else {
-        const player = new Plyr(element, config);
-        player.source = playlist[0];
-        window.player = player;
-      }
-    });
-}
-
 function loadScript(url) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -57,6 +28,43 @@ function loadScript(url) {
     s.onload = resolve;
     s.onerror = reject;
     (document.body || document.head || document.documentElement).appendChild(s);
+  });
+}
+
+function downloadConfig(playListId) {
+  const playlistFileName = `${playListId}.playlist.json`;
+  const playListPath = `${HOST}/configs/`;
+
+  return fetch(`${playListPath}${playlistFileName}`).then((data) => {
+    return data.json();
+  });
+}
+
+function loadPlayerSrc(element, playlistData) {
+  const jsSources = [`${HOST}plyr.polyfilled.min.js`];
+  const config = { ...defaultConfig };
+  // eslint-disable-next-line prefer-destructuring
+  config.ads.tagUrl = playlistData[0].ads[0];
+
+  if (playlistData[0].sources[0].type === 'application/x-mpegURL') {
+    config.useHLS = true;
+    jsSources.push(HLS_URL);
+  }
+  return Promise.all(jsSources.map(loadScript)).then(() => {
+    if (config.useHLS) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(playlistData[0].sources[0].src);
+        hls.attachMedia(element);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          element.play();
+        });
+      }
+      new bidmaticPlyr(element, config);
+    } else {
+      const player = new bidmaticPlyr(element, config);
+      player.source = playlistData[0];
+    }
   });
 }
 
@@ -80,8 +88,11 @@ function initDom(container) {
   container.appendChild(mainContainer);
   mainContainer.appendChild(detachableContainer);
   detachableContainer.appendChild(videoTag);
-  initPlayer(videoTag);
   const detachable = new Detachable(`#${detachId}`);
+  downloadConfig(container.getAttribute('data-detachable-player')).then((playlistData) => {
+    loadPlayerSrc(videoTag, playlistData);
+  });
+
   detachable.onContainerVisible = () => {
     // player.play();
   };

@@ -69,6 +69,7 @@ const tasks = {
   css: [],
   js: [],
   sprite: [],
+  static: [],
 };
 
 // Size plugin
@@ -196,14 +197,23 @@ Object.entries(build.sprite).forEach(([filename, entry]) => {
   );
 });
 
+// Static
+Object.entries(build.static).forEach(([filename, entry]) => {
+  const { dist, src } = entry;
+  const name = `static:${filename}`;
+  tasks.static.push(name);
+
+  gulp.task(name, () => gulp.src(src).pipe(gulp.dest(dist)));
+});
+
 // Build all tasks
 gulp.task('js', gulp.parallel(...tasks.js));
 gulp.task('css', gulp.parallel(...tasks.css));
 gulp.task('sprites', gulp.parallel(...tasks.sprite));
+gulp.task('static', gulp.parallel(...tasks.static));
 
 // Watch for file changes
 gulp.task('watch', () => {
-  console.log(123123123)
   // Plyr core
   gulp.watch(paths.plyr.src.js, gulp.parallel('js'));
   gulp.watch(paths.plyr.src.sass, gulp.parallel('css'));
@@ -228,7 +238,7 @@ gulp.task('serve', () =>
 );
 
 // Build distribution
-gulp.task('build', gulp.series('clean', gulp.parallel('js', 'css', 'sprites')));
+gulp.task('build', gulp.series('clean', gulp.parallel('js', 'css', 'sprites', 'static')));
 
 // Default gulp task
 gulp.task('default', gulp.series('build', gulp.parallel('serve', 'watch')));
