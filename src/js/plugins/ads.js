@@ -70,7 +70,7 @@ class Ads {
       this.player.isHTML5 &&
       this.player.isVideo &&
       config.enabled &&
-      (!is.empty(config.publisherId) || is.url(config.tagUrl))
+      (!is.empty(config.publisherId) || is.url(config.tagUrl) || !is.empty(config.response))
     );
   }
 
@@ -197,7 +197,13 @@ class Ads {
     try {
       // Request video ads
       const request = new google.ima.AdsRequest();
-      request.adTagUrl = this.tagUrl;
+
+
+      if (this.config.response) {
+        request.adsResponse = this.config.response;
+      } else {
+        request.adTagUrl = this.tagUrl;
+      }
 
       // Specify the linear and nonlinear slot sizes. This helps the SDK
       // to select the correct creative if multiple are returned

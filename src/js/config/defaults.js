@@ -409,6 +409,7 @@ const defaults = {
     enabled: false,
     publisherId: '',
     tagUrl: '',
+    response: '',
   },
 
   // Preview Thumbnails plugin
