@@ -67,7 +67,8 @@ class Ads {
     const { config } = this;
 
     return (
-      this.player.isHTML5 &&
+      // @bidmatic, commented out for supporting ads in youtube mode =)
+      // this.player.isHTML5 &&
       this.player.isVideo &&
       config.enabled &&
       (!is.empty(config.publisherId) || is.url(config.tagUrl) || !is.empty(config.response))
@@ -89,7 +90,6 @@ class Ads {
           this.ready();
         })
         .catch((e) => {
-          debugger
           // Script failed to load or is blocked
           this.trigger('error', new Error('Google IMA SDK failed to load'));
         });
