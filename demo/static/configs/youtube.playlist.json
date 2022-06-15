@@ -3,8 +3,8 @@
     "type": "video",
     "title": "Zelenskiy krasavchik2",
     "ads": [
-      "https://s.adtelligent.com/?aid=331133&width=640&height=480&domain=test.com",
-      "https://s.adtelligent.com/?aid=331133&width=640&height=480&domain=test.com"
+      "https://s.adtelligent.com/?aid=331133&width=640&height=480&domain=test.com&cb=123",
+      "https://s.adtelligent.com/?aid=331133&width=640&height=480&domain=test.com&cb=123"
     ],
     "sources": [
       {
