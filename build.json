@@ -64,7 +64,7 @@
   },
   "static": {
     "playlists": {
-      "src": "./demo/*.playlist.json",
+      "src": "./demo/static/configs/*.json",
       "dist": "./demo/dist/configs"
     }
   }

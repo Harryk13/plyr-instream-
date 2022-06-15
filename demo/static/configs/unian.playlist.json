@@ -1,17 +1,5 @@
 [
-  {
-    "type": "video",
-    "ads": [
-      "https://s.adtelligent.com/?aid=331133&width=640&height=480&domain=test.com"
-    ],
-    "sources": [
-      {
-        "src": "https://youtu.be/WiIi2WxpifU",
-        "provider": "youtube"
-      }
-    ],
-    "poster": "https://images.1plus1.video/vod-1/images/202206/8/8e/8edd9fccdce1b544934a24a4a707d21214f5e4762aef547cb52be50ecf12f7b9_1.jpg"
-  },{
+ {
     "type": "video",
     "title": "Zelenskiy krasavchik",
     "ads": [
@@ -23,6 +11,19 @@
         "src": "https://vod-k2310-kbp.1plus1.video/vod/1654872535/Bt4riwKJwCvrHzv6ud4AZA/202206/0/08/084b5c227c3cf87b73887f48be779ee6798e0b3bb7458dd4f295854bce77a654.smil/playlist.m3u8",
         "type": "application/x-mpegURL",
         "size": 576
+      }
+    ],
+    "poster": "https://images.1plus1.video/vod-1/images/202206/8/8e/8edd9fccdce1b544934a24a4a707d21214f5e4762aef547cb52be50ecf12f7b9_1.jpg"
+  },
+  {
+    "type": "video",
+    "ads": [
+      "https://s.adtelligent.com/?aid=331133&width=640&height=480&domain=test.com"
+    ],
+    "sources": [
+      {
+        "src": "https://youtu.be/WiIi2WxpifU",
+        "provider": "youtube"
       }
     ],
     "poster": "https://images.1plus1.video/vod-1/images/202206/8/8e/8edd9fccdce1b544934a24a4a707d21214f5e4762aef547cb52be50ecf12f7b9_1.jpg"

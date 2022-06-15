@@ -1,6 +1,10 @@
 import Detachable from './detachableContainer';
+import { createVmap } from './vmapTool';
 
-const HOST = window.location.href.indexOf('localhost:3000') > -1 ? './dist/' : 'https://player.adtcdn.com/microplayer/';
+const IS_DEV = window.location.href.indexOf('localhost:3000') > -1;
+const HOST = IS_DEV ? './dist/' : 'https://player.bidmatic.io/microplayer/';
+const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
+const PLAYER_FILE_NAME = `plyr.polyfilled${IS_DEV ? '' : '.min'}.js`;
 let inited = false;
 
 function createElement(opts) {
@@ -18,7 +22,6 @@ const defaultConfig = {
     publisherId: '',
   },
 };
-const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
 
 function loadScript(url) {
   return new Promise((resolve, reject) => {
@@ -41,10 +44,10 @@ function downloadConfig(playListId) {
 }
 
 function loadPlayerSrc(element, playlistData) {
-  const jsSources = [`${HOST}plyr.polyfilled.min.js`];
+  const jsSources = [`${HOST}${PLAYER_FILE_NAME}`];
   const config = { ...defaultConfig };
   // eslint-disable-next-line prefer-destructuring
-  config.ads.tagUrl = playlistData[0].ads[0];
+  config.ads.response = createVmap(playlistData[0].ads);
 
   if (playlistData[0].sources[0].type === 'application/x-mpegURL') {
     config.useHLS = true;

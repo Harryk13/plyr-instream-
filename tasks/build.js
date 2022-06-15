@@ -54,6 +54,7 @@ const paths = {
     src: {
       sass: path.join(root, 'demo/src/sass/**/*.scss'),
       js: path.join(root, 'demo/src/js/**/*.js'),
+      static: path.join(root, 'demo/static/**/*.json'),
     },
 
     // Output paths
@@ -222,6 +223,7 @@ gulp.task('watch', () => {
   // Demo
   gulp.watch(paths.demo.src.js, gulp.parallel('js'));
   gulp.watch(paths.demo.src.sass, gulp.parallel('css'));
+  gulp.watch(paths.demo.src.static, gulp.parallel('static'));
 });
 
 // Serve via browser sync
