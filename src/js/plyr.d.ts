@@ -545,6 +545,7 @@ declare namespace Plyr {
     enabled: boolean;
     publisherId?: string;
     tagUrl?: string;
+    response?: string;
   }
 
   interface SpeedOptions {
