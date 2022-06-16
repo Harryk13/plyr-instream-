@@ -6,7 +6,7 @@
   margin: 0 auto;
   padding: $spacing-base;
 
-  @media only screen and (min-width: $screen-md) {
+  //@media only screen and (min-width: $screen-md) {
     align-items: center;
     display: flex;
     max-width: $container-max-width;
@@ -15,5 +15,5 @@
     > * {
       flex: 1;
     }
-  }
+  //}
 }

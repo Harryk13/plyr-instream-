@@ -89,7 +89,7 @@ class Ads {
         .then(() => {
           this.ready();
         })
-        .catch((e) => {
+        .catch(() => {
           // Script failed to load or is blocked
           this.trigger('error', new Error('Google IMA SDK failed to load'));
         });

@@ -16,7 +16,7 @@ class Detachable {
     }
     this.player = null;
     this.container = container;
-    this.currentState = DETACH_STATES.ready;
+    this.currentState = DETACH_STATES.init;
     this.containerPrevStyles = {};
     this.injectCloseButton();
     this.initObserver();

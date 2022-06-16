@@ -46,12 +46,6 @@ $css-vars-use-native: true;
 @import '../components/navigation';
 @import '../components/players';
 
-// Plyr
-@import '../../../../src/sass/plyr';
-
 //// Utils
 @import '../utilities/cosmetic';
 @import '../utilities/hidden';
-
-// Custom modules
-@import "../custom/detachable.scss";

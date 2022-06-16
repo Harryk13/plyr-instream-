@@ -1,7 +1,7 @@
 import Detachable from './detachableContainer';
 import { createVmap } from './vmapTool';
 
-const IS_DEV = window.location.href.indexOf('localhost:3000') > -1;
+const IS_DEV = window.location.href.indexOf('localhost:300') > -1;
 const HOST = IS_DEV ? './dist/' : 'https://player.bidmatic.io/microplayer/';
 const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
 const PLAYER_FILE_NAME = `plyr.polyfilled${IS_DEV ? '' : '.min'}.js`;
@@ -23,15 +23,28 @@ const defaultConfig = {
   },
 };
 
-function loadScript(url) {
+function loadResource(url, type, container) {
   return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = url;
+    const s = document.createElement(type);
+    if (type === 'script') {
+      s.async = true;
+      s.src = url;
+    } else {
+      s.rel = 'stylesheet';
+      s.href = url;
+    }
     s.onload = resolve;
     s.onerror = reject;
-    (document.body || document.head || document.documentElement).appendChild(s);
+    container.appendChild(s);
   });
+}
+
+function loadStyles(url) {
+  return loadResource(url, 'link', document.head);
+}
+
+function loadScript(url) {
+  return loadResource(url, 'script', document.body || document.head || document.documentElement);
 }
 
 function downloadConfig(playListId) {
@@ -91,8 +104,11 @@ function initDom(container) {
   container.appendChild(mainContainer);
   mainContainer.appendChild(detachableContainer);
   detachableContainer.appendChild(videoTag);
+
   const detachable = new Detachable(`#${detachId}`);
   downloadConfig(container.getAttribute('data-detachable-player')).then((playlistData) => {
+    const styleURL = `${HOST}integration.css`;
+    loadStyles(styleURL);
     loadPlayerSrc(videoTag, playlistData).then((playerInstance) => {
       detachable.player = playerInstance;
     });
