@@ -48,7 +48,7 @@ function loadScript(url) {
 }
 
 function downloadConfig(playListId) {
-  const playlistFileName = `${playListId}.playlist.json`;
+  const playlistFileName = `${playListId}.playlist.json?cb=${Math.random()}`;
   const playListPath = `${HOST}/configs/`;
 
   return fetch(`${playListPath}${playlistFileName}`).then((data) => {
@@ -57,7 +57,7 @@ function downloadConfig(playListId) {
 }
 
 function loadPlayerSrc(element, playlistData) {
-  const jsSources = [`${HOST}${PLAYER_FILE_NAME}`];
+  const jsSources = [`${HOST}${PLAYER_FILE_NAME}?cb=${Math.random()}`];
   const config = { ...defaultConfig };
   // eslint-disable-next-line prefer-destructuring
   config.ads.response = createVmap(playlistData[0].ads);
@@ -107,7 +107,7 @@ function initDom(container) {
 
   const detachable = new Detachable(`#${detachId}`);
   downloadConfig(container.getAttribute('data-detachable-player')).then((playlistData) => {
-    const styleURL = `${HOST}integration.css`;
+    const styleURL = `${HOST}integration.css?cb=${Math.random()}`;
     loadStyles(styleURL);
     loadPlayerSrc(videoTag, playlistData).then((playerInstance) => {
       detachable.player = playerInstance;
