@@ -181,6 +181,8 @@ declare class Plyr {
    */
   restart(): void;
 
+  triggerResize(): void;
+
   /**
    * Rewind playback by the specified seek time. If no parameter is passed, the default seek time will be used.
    */

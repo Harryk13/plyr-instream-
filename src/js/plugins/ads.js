@@ -7,7 +7,7 @@
 /* global google */
 
 import { createElement } from '../utils/elements';
-import { triggerEvent } from '../utils/events';
+import { on, triggerEvent } from '../utils/events';
 import i18n from '../utils/i18n';
 import is from '../utils/is';
 import loadScript from '../utils/load-script';
@@ -198,7 +198,6 @@ class Ads {
     try {
       // Request video ads
       const request = new google.ima.AdsRequest();
-
 
       if (this.config.response) {
         request.adsResponse = this.config.response;
@@ -434,7 +433,6 @@ class Ads {
    * resize the advertisement when the player resizes
    */
   listeners = () => {
-    const { container } = this.player.elements;
     let time;
 
     this.player.on('canplay', () => {
@@ -466,12 +464,16 @@ class Ads {
 
     // Listen to the resizing of the window. And resize ad accordingly
     // TODO: eventually implement ResizeObserver
-    window.addEventListener('resize', () => {
-      if (this.manager) {
-        this.manager.resize(container.offsetWidth, container.offsetHeight, google.ima.ViewMode.NORMAL);
-      }
-    });
+    window.addEventListener('resize', () => this.resize());
+    on(this.player.elements.container, 'resized', () => this.resize());
   };
+
+  resize() {
+    if (this.manager && this.enabled) {
+      const { container } = this.player.elements;
+      this.manager.resize(container.offsetWidth, container.offsetHeight, google.ima.ViewMode.NORMAL);
+    }
+  }
 
   /**
    * Initialize the adsManager and start playing advertisements

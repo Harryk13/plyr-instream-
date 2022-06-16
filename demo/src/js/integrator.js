@@ -15,7 +15,7 @@ function createElement(opts) {
 }
 
 const defaultConfig = {
-  debug: true,
+  debug: IS_DEV,
   controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
   ads: {
     enabled: true,
@@ -63,11 +63,11 @@ function loadPlayerSrc(element, playlistData) {
           element.play();
         });
       }
-      new bidmaticPlyr(element, config);
-    } else {
-      const player = new bidmaticPlyr(element, config);
-      player.source = playlistData[0];
+      return new bidmaticPlyr(element, config);
     }
+    const player = new bidmaticPlyr(element, config);
+    player.source = playlistData[0];
+    return player;
   });
 }
 
@@ -93,12 +93,10 @@ function initDom(container) {
   detachableContainer.appendChild(videoTag);
   const detachable = new Detachable(`#${detachId}`);
   downloadConfig(container.getAttribute('data-detachable-player')).then((playlistData) => {
-    loadPlayerSrc(videoTag, playlistData);
+    loadPlayerSrc(videoTag, playlistData).then((playerInstance) => {
+      detachable.player = playerInstance;
+    });
   });
-
-  detachable.onContainerVisible = () => {
-    // player.play();
-  };
 }
 
 function placeholderLookupAndInit() {
