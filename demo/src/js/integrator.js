@@ -46,27 +46,47 @@ function downloadConfig(playListId) {
 function loadPlayerSrc(element, playlistData) {
   const jsSources = [`${HOST}${PLAYER_FILE_NAME}`];
   const config = { ...defaultConfig };
-  // eslint-disable-next-line prefer-destructuring
-  config.ads.response = createVmap(playlistData[0].ads);
 
   if (playlistData[0].sources[0].type === 'application/x-mpegURL') {
     config.useHLS = true;
     jsSources.push(HLS_URL);
   }
+
   return Promise.all(jsSources.map(loadScript)).then(() => {
+    let currentPlaylistIndex = 0;
+    let player;
+
+    config.ads.response = createVmap(playlistData[0].ads);
+
     if (config.useHLS) {
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(playlistData[0].sources[0].src);
+
+        hls.loadSource(playlistData[currentPlaylistIndex].sources[0].src);
         hls.attachMedia(element);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           element.play();
         });
       }
-      new bidmaticPlyr(element, config);
+
+      player = new bidmaticPlyr(element, config);
     } else {
-      const player = new bidmaticPlyr(element, config);
-      player.source = playlistData[0];
+      player = new bidmaticPlyr(element, config);
+
+      player.source = playlistData[currentPlaylistIndex];
+
+      window.pl = player;
+      player.on('ended', () => {
+        currentPlaylistIndex += 1;
+
+        if (currentPlaylistIndex < playlistData.length) {
+          player.source = playlistData[currentPlaylistIndex];
+          config.ads.response = createVmap(playlistData[currentPlaylistIndex].ads);
+          player.ads.config = config.ads;
+          player.ads.loadAds();
+          player.play();
+        }
+      });
     }
   });
 }
@@ -104,9 +124,11 @@ function initDom(container) {
 function placeholderLookupAndInit() {
   if (inited) return;
   const element = document.querySelector('[data-detachable-player]');
+
   if (element == null) {
     return;
   }
+
   inited = true;
   initDom(element);
 }
