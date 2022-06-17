@@ -1,7 +1,7 @@
 import Detachable from './detachableContainer';
 import { createVmap } from './vmapTool';
 
-const IS_DEV = window.location.href.indexOf('localhost:3000') > -1;
+const IS_DEV = window.location.href.indexOf('localhost:300') > -1;
 const HOST = IS_DEV ? './dist/' : 'https://player.bidmatic.io/microplayer/';
 const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
 const PLAYER_FILE_NAME = `plyr.polyfilled${IS_DEV ? '' : '.min'}.js`;
@@ -15,7 +15,7 @@ function createElement(opts) {
 }
 
 const defaultConfig = {
-  debug: true,
+  debug: IS_DEV,
   controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
   ads: {
     enabled: true,
@@ -23,19 +23,32 @@ const defaultConfig = {
   },
 };
 
-function loadScript(url) {
+function loadResource(url, type, container) {
   return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = url;
+    const s = document.createElement(type);
+    if (type === 'script') {
+      s.async = true;
+      s.src = url;
+    } else {
+      s.rel = 'stylesheet';
+      s.href = url;
+    }
     s.onload = resolve;
     s.onerror = reject;
-    (document.body || document.head || document.documentElement).appendChild(s);
+    container.appendChild(s);
   });
 }
 
+function loadStyles(url) {
+  return loadResource(url, 'link', document.head);
+}
+
+function loadScript(url) {
+  return loadResource(url, 'script', document.body || document.head || document.documentElement);
+}
+
 function downloadConfig(playListId) {
-  const playlistFileName = `${playListId}.playlist.json`;
+  const playlistFileName = `${playListId}.playlist.json?cb=${Math.random()}`;
   const playListPath = `${HOST}/configs/`;
 
   return fetch(`${playListPath}${playlistFileName}`).then((data) => {
@@ -44,7 +57,7 @@ function downloadConfig(playListId) {
 }
 
 function loadPlayerSrc(element, playlistData) {
-  const jsSources = [`${HOST}${PLAYER_FILE_NAME}`];
+  const jsSources = [`${HOST}${PLAYER_FILE_NAME}?cb=${Math.random()}`];
   const config = { ...defaultConfig };
 
   if (playlistData[0].sources[0].type === 'application/x-mpegURL') {
@@ -72,7 +85,6 @@ function loadPlayerSrc(element, playlistData) {
       player = new bidmaticPlyr(element, config);
     } else {
       player = new bidmaticPlyr(element, config);
-
       player.source = playlistData[currentPlaylistIndex];
 
       window.pl = player;
@@ -88,6 +100,8 @@ function loadPlayerSrc(element, playlistData) {
         }
       });
     }
+
+    return player;
   });
 }
 
@@ -111,14 +125,16 @@ function initDom(container) {
   container.appendChild(mainContainer);
   mainContainer.appendChild(detachableContainer);
   detachableContainer.appendChild(videoTag);
+
   const detachable = new Detachable(`#${detachId}`);
   downloadConfig(container.getAttribute('data-detachable-player')).then((playlistData) => {
-    loadPlayerSrc(videoTag, playlistData);
-  });
+    const styleURL = `${HOST}integration.css?cb=${Math.random()}`;
 
-  detachable.onContainerVisible = () => {
-    // player.play();
-  };
+    loadStyles(styleURL);
+    loadPlayerSrc(videoTag, playlistData).then((playerInstance) => {
+      detachable.player = playerInstance;
+    });
+  });
 }
 
 function placeholderLookupAndInit() {

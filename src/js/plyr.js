@@ -447,6 +447,13 @@ class Plyr {
   };
 
   /**
+   * triggers event for ad to resize to container size
+   */
+  triggerResize() {
+    triggerEvent.call(this, this.elements.container, 'resized');
+  }
+
+  /**
    * Rewind
    * @param {Number} seekTime - how far to rewind in seconds. Defaults to the config.seekTime
    */

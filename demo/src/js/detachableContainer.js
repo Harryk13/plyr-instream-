@@ -14,6 +14,7 @@ class Detachable {
     if (container == null) {
       throw new Error('unknown element', element);
     }
+    this.player = null;
     this.container = container;
     this.currentState = DETACH_STATES.init;
     this.containerPrevStyles = {};
@@ -56,17 +57,20 @@ class Detachable {
     });
   }
 
-  onContainerVisible() {
+  resizePlayer() {
+    if (this.player) {
+      this.player.triggerResize();
+    }
   }
 
   becomeVisible() {
     if (this.currentState === DETACH_STATES.ready) {
       return;
     }
-    this.onContainerVisible();
+    this.container.className = this.container.className.replace(' detached', '');
     this.restoreContainerSize();
     this.currentState = DETACH_STATES.ready;
-    this.container.className = this.container.className.replace(' detached', '');
+    this.resizePlayer();
   }
 
   becomeInvisible() {
@@ -74,6 +78,7 @@ class Detachable {
       this.holdContainerSize();
       this.container.className += ' detached';
       this.currentState = DETACH_STATES.detached;
+      this.resizePlayer();
     }
   }
 

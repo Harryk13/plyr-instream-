@@ -1,0 +1,17 @@
+[
+  {
+    "type": "video",
+    "ads": [
+      "https://s.adtelligent.com/?vpaid_type=3&video_duration=180&content_page_url=https://vikna.ua/&width=640&height=480&aid=763199"
+    ],
+    "sources": [
+      {
+        "src": "https://player.bidmatic.io/microplayer/videos/video_412512.mp4",
+        "type": "video/mp4",
+        "size": 480
+      }
+    ],
+    "poster": "https://i.ytimg.com/vi/WiIi2WxpifU/hqdefault.jpg"
+  }
+
+]

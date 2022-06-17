@@ -47,6 +47,10 @@
       "src": "./demo/src/sass/bundles/demo.scss",
       "dist": "./demo/dist/"
     },
+    "integration.css": {
+      "src": "./demo/src/sass/bundles/integration.scss",
+      "dist": "./demo/dist/"
+    },
     "error.css": {
       "src": "./demo/src/sass/bundles/error.scss",
       "dist": "./demo/dist/"
