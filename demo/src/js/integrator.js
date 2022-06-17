@@ -87,7 +87,6 @@ function loadPlayerSrc(element, playlistData) {
       player = new bidmaticPlyr(element, config);
       player.source = playlistData[currentPlaylistIndex];
 
-      window.pl = player;
       player.on('ended', () => {
         currentPlaylistIndex += 1;
 
