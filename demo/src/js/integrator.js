@@ -86,6 +86,9 @@ function loadPlayerSrc(element, playlistData) {
     } else {
       player = new bidmaticPlyr(element, config);
       player.source = playlistData[currentPlaylistIndex];
+      player.ads.on('loaded', () => {
+        player.triggerResize();
+      });
 
       player.on('ended', () => {
         currentPlaylistIndex += 1;
