@@ -3,8 +3,15 @@
 
 const gulp = require('gulp');
 const Rsync = require('rsync');
+const { exec } = require('child_process');
 
-gulp.task('deploy', (done) => {
+const filesToDropCache = [
+  'integrator.min.js',
+  'integration.css',
+  'plyr.polyfilled.min.js',
+  'configs/vikna.playlist.json',
+];
+gulp.task('cdn', (done) => {
   const rsync = new Rsync()
     .shell('ssh')
     .flags('az')
@@ -18,3 +25,25 @@ gulp.task('deploy', (done) => {
     done();
   });
 });
+
+gulp.task('clean-cache', (done) => {
+  const pullZone = '0f7dafb3-3b55-4b7a-8471-a03888c85ef2';
+  const token =
+    'eyJraWQiOiJ4UTVmbFI5NDBiMXdjTW85NFBMUHhHdzFyb1pCSXBTYnFReWlqcWZUc0xzIiwidHlwIjoiSldUIiwiYWxnIjoiUlM1MTIifQ.eyJpc3MiOiJOb3BlIiwiaWF0IjoxNjM0NjQ5Mjc0LCJqdGkiOiI4NDFhZGUzNy1kOWVkLTQ0ODMtOGJmMC0wY2IzZmRiMTg3YjMiLCJ1c2VyIjp7ImlkIjoiYTIxOTUyNTQtZGEyMC00NjVlLWJlNmItNjI4MGQzMDY3NGU1IiwiaW1wZXJzb25hdG9yX2lkIjpudWxsLCJhY2NvdW50X2lkIjoiN2QzOGZiMjktM2M0Ni00MWFhLTk2MjktZmI0MzM1MmMwZWY4IiwiZW1haWwiOiJhZG1pbnNAYWR0ZWxsaWdlbnQuY29tIn19.Gz-xt_hM8PGqgQwrhdNbUQEWqM9WFxu--V2MKk9Vn3z2N1i7S3EQpdp67IMRhkf08k5gcrxl_1Pdq200GuUeTZfoS-L4kO6SNEoLdvE2Rjp6tL9oIljhCm68DeZ1wpqnWHH2V-wxIcbAM3PY1BRSytFLk6o-eYLOmUn320kI1iWMtEDnbC2B249Mfo9p10AGsOcIkz31yQkU_V9IeBwUdwO5cIAtuzi0eFibKNBrYUKQ9qKyaNRGDNU-DW7zA9YX2Poiy1AABd0Gmh5vLV83KNhZfBTtTb39ehrS53gUw8C5lUkkphPs0O-TCfWZsU55XTC0WXAEB60L03d2_Ow6zVZaf55OUrQVHdg1JtN6oGRevQM7VqhSo5qqPhDgj43D9d5z9EhP1VIReRHwF_PrlKINbj5NZ_xeZraofiCH1-XyIDoTu5O7itU5LgP4MncFxMKcuOxD23bLYsjXUwfqM5fgXkva0hazBxccRng6hfei6MSjg3NxNhHgb9jWTR9RNgxfPVW3dmnXPADC87VGSUF7GkBimfHUNU4puVLcX60qPU2MOkrkE5Bp06pvF6hN9Hu2cyQ15MszKG42LkjZJpy8nb4Scvf78zd-AbswNplR3K2WAUgVhlhlMQJRvAjjXeGTsHimDf1b0xhu0_b-Zm80xlm49d14meJKCzOB0dM';
+  const files = filesToDropCache
+    .map((fName) => {
+      return `"/microplayer/${fName}"`;
+    })
+    .join(',');
+  exec(
+    `curl -k -X DELETE "https://api.websa.com/v2/pull_zones/${pullZone}/cache"  -H "Accept: application/json"  -H "Authorization: Bearer ${token}"  -H "Content-Type: application/json"  -d '{ "paths": [${files}], "use_partial_paths":false }'`,
+    (err) => {
+      if (err) {
+        throw err;
+      }
+      done();
+    },
+  );
+});
+
+gulp.task('deploy', gulp.series('cdn', 'clean-cache'));

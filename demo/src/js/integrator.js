@@ -49,7 +49,7 @@ function loadScript(url) {
 
 function downloadConfig(playListId) {
   const playlistFileName = `${playListId}.playlist.json?cb=${Math.random()}`;
-  const playListPath = `${HOST}/configs/`;
+  const playListPath = `${HOST}configs/`;
 
   return fetch(`${playListPath}${playlistFileName}`).then((data) => {
     return data.json();
@@ -128,12 +128,16 @@ function initDom(container) {
   mainContainer.appendChild(detachableContainer);
   detachableContainer.appendChild(videoTag);
 
-  const detachable = new Detachable(`#${detachId}`);
-  downloadConfig(container.getAttribute('data-detachable-player')).then((playlistData) => {
+  downloadConfig(container.getAttribute('data-detachable-player')).then((playerConfig) => {
+    const detachConfig = playerConfig.detach;
+    const detachable = new Detachable(`#${detachId}`, {
+      position: detachConfig && detachConfig.position,
+      size: detachConfig && detachConfig.size,
+    });
     const styleURL = `${HOST}integration.css?cb=${Math.random()}`;
 
     loadStyles(styleURL);
-    loadPlayerSrc(videoTag, playlistData).then((playerInstance) => {
+    loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
       detachable.player = playerInstance;
     });
   });
