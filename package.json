@@ -97,7 +97,6 @@
     "custom-event-polyfill": "^1.0.7",
     "loadjs": "^4.2.0",
     "rangetouch": "^2.0.1",
-    "request-promise": "^4.2.6",
     "url-polyfill": "^1.1.12"
   }
 }
