@@ -6,7 +6,7 @@ const DETACH_STATES = {
 };
 
 class Detachable {
-  constructor(element) {
+  constructor(element, opts = {}) {
     let container = element;
     if (typeof element === 'string') {
       container = document.querySelector(element);
@@ -14,6 +14,8 @@ class Detachable {
     if (container == null) {
       throw new Error('unknown element', element);
     }
+    this.detachPosition = opts.position;
+    this.detachSize = opts.size;
     this.player = null;
     this.container = container;
     this.currentState = DETACH_STATES.init;
@@ -68,6 +70,12 @@ class Detachable {
       return;
     }
     this.container.className = this.container.className.replace(' detached', '');
+    const dp = this.detachPosition;
+    if (dp) {
+      Object.keys(dp).forEach((key) => {
+        this.container.style[key] = `${dp[key]}px`;
+      });
+    }
     this.restoreContainerSize();
     this.currentState = DETACH_STATES.ready;
     this.resizePlayer();
@@ -78,6 +86,10 @@ class Detachable {
       this.holdContainerSize();
       this.container.className += ' detached';
       this.currentState = DETACH_STATES.detached;
+      if (this.detachSize) {
+        this.container.style.width = `${this.detachSize.width}px`;
+        this.container.style.height = `${this.detachSize.height}px`;
+      }
       this.resizePlayer();
     }
   }
@@ -96,6 +108,10 @@ class Detachable {
     const { parentNode } = this.container;
     parentNode.style.width = this.containerPrevStyles.width;
     parentNode.style.height = this.containerPrevStyles.height;
+    if (this.detachSize) {
+      this.container.style.width = null;
+      this.container.style.height = null;
+    }
   }
 }
 
