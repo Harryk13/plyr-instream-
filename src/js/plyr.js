@@ -362,7 +362,11 @@ class Plyr {
 
     // Intecept play with ads
     if (this.ads && this.ads.enabled) {
-      this.ads.managerPromise.then(() => this.ads.play()).catch(() => silencePromise(this.media.play()));
+      this.ads.managerPromise.then(() => {
+        this.ads.play();
+      }).catch(() => {
+        silencePromise(this.media.play());
+      });
     }
 
     // Return the promise (for HTML5)

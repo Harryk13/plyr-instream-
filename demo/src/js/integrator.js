@@ -6,6 +6,8 @@ const HOST = IS_DEV ? './dist/' : 'https://player.bidmatic.io/microplayer/';
 const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
 const PLAYER_FILE_NAME = `plyr.polyfilled${IS_DEV ? '' : '.min'}.js`;
 let inited = false;
+let player;
+let hls;
 
 function createElement(opts) {
   const el = document.createElement(opts.tag || 'div');
@@ -56,30 +58,75 @@ function downloadConfig(playListId) {
   });
 }
 
+function setToPlay(item, config, forcePlay) {
+  if (config.adsNeed) {
+    config.ads.response = createVmap(item.ads);
+    player.ads.config = config.ads;
+    player.ads.loadAds();
+  }
+
+  if (item.isHls) {
+    if (!hls) {
+      hls = new Hls();
+
+      hls.attachMedia(player.media);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (forcePlay) {
+          player.media.play();
+        }
+      });
+    }
+
+    hls.loadSource(item.sources[0].src);
+  } else {
+    player.source = item;
+
+    if (forcePlay) {
+      player.play();
+    }
+  }
+}
+
 function loadPlayerSrc(element, playlistData) {
   const jsSources = [`${HOST}${PLAYER_FILE_NAME}?cb=${Math.random()}`];
   const config = { ...defaultConfig };
-  // eslint-disable-next-line prefer-destructuring
-  config.ads.response = createVmap(playlistData[0].ads);
+  let hasHlsItems = false;
 
-  if (playlistData[0].sources[0].type === 'application/x-mpegURL') {
-    config.useHLS = true;
+  if (config.useHLS && Hls.isSupported()) {
+    playlistData.forEach((item) => {
+      if (item.sources[0].type === 'application/x-mpegURL') {
+        item.isHls = true;
+        hasHlsItems = true;
+      }
+    });
+  }
+
+  if (hasHlsItems) {
     jsSources.push(HLS_URL);
   }
+
   return Promise.all(jsSources.map(loadScript)).then(() => {
-    if (config.useHLS) {
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(playlistData[0].sources[0].src);
-        hls.attachMedia(element);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          element.play();
-        });
+    let currentPlaylistIndex = 0;
+
+    config.ads.response = createVmap(playlistData[0].ads);
+
+    player = new bidmaticPlyr(element, config);
+
+    player.ads.on('loaded', () => {
+      player.triggerResize();
+    });
+
+    player.on('ended', () => {
+      currentPlaylistIndex += 1;
+      config.adsNeed = true;
+
+      if (currentPlaylistIndex < playlistData.length) {
+        setToPlay(playlistData[currentPlaylistIndex], config, true);
       }
-      return new bidmaticPlyr(element, config);
-    }
-    const player = new bidmaticPlyr(element, config);
-    player.source = playlistData[0];
+    });
+
+    setToPlay(playlistData[currentPlaylistIndex], config);
+
     return player;
   });
 }
@@ -112,6 +159,7 @@ function initDom(container) {
       size: detachConfig && detachConfig.size,
     });
     const styleURL = `${HOST}integration.css?cb=${Math.random()}`;
+
     loadStyles(styleURL);
     loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
       detachable.player = playerInstance;
@@ -122,9 +170,11 @@ function initDom(container) {
 function placeholderLookupAndInit() {
   if (inited) return;
   const element = document.querySelector('[data-detachable-player]');
+
   if (element == null) {
     return;
   }
+
   inited = true;
   initDom(element);
 }
