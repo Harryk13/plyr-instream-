@@ -1,3 +1,5 @@
+/* global Hls, bidmaticPlyr */
+import { AutoplayController } from './autoplayDetector';
 import Detachable from './detachableContainer';
 import { createVmap } from './vmapTool';
 
@@ -6,13 +8,17 @@ const HOST = IS_DEV ? './dist/' : 'https://player.bidmatic.io/microplayer/';
 const HLS_URL = 'https://cdn.jsdelivr.net/hls.js/latest/hls.min.js';
 const PLAYER_FILE_NAME = `plyr.polyfilled${IS_DEV ? '' : '.min'}.js`;
 let inited = false;
-let player;
 let hls;
 
 function createElement(opts) {
   const el = document.createElement(opts.tag || 'div');
   el.id = opts.id;
   el.className = opts.className;
+  if (opts.attributes) {
+    for (const key in opts.attributes) {
+      el.setAttribute(key, opts.attributes[key]);
+    }
+  }
   return el;
 }
 
@@ -58,7 +64,7 @@ function downloadConfig(playListId) {
   });
 }
 
-function setToPlay(item, config, forcePlay) {
+function setToPlay(player, item, config, forcePlay) {
   if (config.adsNeed) {
     config.ads.response = createVmap(item.ads);
     player.ads.config = config.ads;
@@ -109,8 +115,9 @@ function loadPlayerSrc(element, playlistData) {
     let currentPlaylistIndex = 0;
 
     config.ads.response = createVmap(playlistData[0].ads);
-
-    player = new bidmaticPlyr(element, config);
+    // config.muted=true;
+    // config.volume=0;
+    const player = new bidmaticPlyr(element, config);
 
     player.ads.on('loaded', () => {
       player.triggerResize();
@@ -121,11 +128,11 @@ function loadPlayerSrc(element, playlistData) {
       config.adsNeed = true;
 
       if (currentPlaylistIndex < playlistData.length) {
-        setToPlay(playlistData[currentPlaylistIndex], config, true);
+        setToPlay(player, playlistData[currentPlaylistIndex], config, true);
       }
     });
 
-    setToPlay(playlistData[currentPlaylistIndex], config);
+    setToPlay(player, playlistData[currentPlaylistIndex], config);
 
     return player;
   });
@@ -145,12 +152,18 @@ function initDom(container) {
     attributes: {
       controls: true,
       crossorigin: true,
-      playsinline: true,
+      playsinline: '',
     },
   });
+
   container.appendChild(mainContainer);
   mainContainer.appendChild(detachableContainer);
   detachableContainer.appendChild(videoTag);
+
+  const autoplayStatus = new AutoplayController(videoTag);
+  autoplayStatus.performCheck().then((data) => {
+    console.log('autoplay', data);
+  });
 
   downloadConfig(container.getAttribute('data-detachable-player')).then((playerConfig) => {
     const detachConfig = playerConfig.detach;
@@ -163,6 +176,9 @@ function initDom(container) {
     loadStyles(styleURL);
     loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
       detachable.player = playerInstance;
+      if (IS_DEV) {
+        window.player = playerInstance;
+      }
     });
   });
 }
