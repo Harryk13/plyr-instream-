@@ -24,6 +24,7 @@ function createElement(opts) {
 
 const defaultConfig = {
   debug: IS_DEV,
+  autoplay: true,
   controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
   ads: {
     enabled: true,
@@ -115,8 +116,6 @@ function loadPlayerSrc(element, playlistData) {
     let currentPlaylistIndex = 0;
 
     config.ads.response = createVmap(playlistData[0].ads);
-    // config.muted=true;
-    // config.volume=0;
     const player = new bidmaticPlyr(element, config);
 
     player.ads.on('loaded', () => {
@@ -160,11 +159,6 @@ function initDom(container) {
   mainContainer.appendChild(detachableContainer);
   detachableContainer.appendChild(videoTag);
 
-  const autoplayStatus = new AutoplayController(videoTag);
-  autoplayStatus.performCheck().then((data) => {
-    console.log('autoplay', data);
-  });
-
   downloadConfig(container.getAttribute('data-detachable-player')).then((playerConfig) => {
     const detachConfig = playerConfig.detach;
     const detachable = new Detachable(`#${detachId}`, {
@@ -175,6 +169,10 @@ function initDom(container) {
 
     loadStyles(styleURL);
     loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
+      // const autoplayStatus = new AutoplayController(playerInstance);
+      // autoplayStatus.performCheck().then((data) => {
+      //   console.log('autoplay', data);
+      // });
       detachable.player = playerInstance;
       if (IS_DEV) {
         window.player = playerInstance;
