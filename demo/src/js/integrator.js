@@ -24,9 +24,10 @@ function createElement(opts) {
 
 const defaultConfig = {
   debug: IS_DEV,
-  autoplay: true,
+  // autoplay: true,
   controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
   ads: {
+    autoplay: true,
     enabled: true,
     publisherId: '',
   },
@@ -65,6 +66,14 @@ function downloadConfig(playListId) {
   });
 }
 
+function checkAutoplay(player) {
+  player.autoPlayController.performCheck().then((result) => {
+    if (result.autoplayAllowed) {
+      player.play();
+    }
+  });
+}
+
 function setToPlay(player, item, config, forcePlay) {
   if (config.adsNeed) {
     config.ads.response = createVmap(item.ads);
@@ -78,8 +87,10 @@ function setToPlay(player, item, config, forcePlay) {
 
       hls.attachMedia(player.media);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (forcePlay) {
+        if (player.autoPlayController.isChecked && player.autoPlayController.autoplayAllowed || forcePlay) {
           player.media.play();
+        } else {
+          checkAutoplay(player);
         }
       });
     }
@@ -88,8 +99,10 @@ function setToPlay(player, item, config, forcePlay) {
   } else {
     player.source = item;
 
-    if (forcePlay) {
+    if (player.autoPlayController.isChecked && player.autoPlayController.autoplayAllowed || forcePlay) {
       player.play();
+    } else {
+      checkAutoplay(player);
     }
   }
 }
@@ -117,6 +130,7 @@ function loadPlayerSrc(element, playlistData) {
 
     config.ads.response = createVmap(playlistData[0].ads);
     const player = new bidmaticPlyr(element, config);
+    player.autoPlayController = new AutoplayController(player);
 
     player.ads.on('loaded', () => {
       player.triggerResize();
@@ -169,10 +183,6 @@ function initDom(container) {
 
     loadStyles(styleURL);
     loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
-      // const autoplayStatus = new AutoplayController(playerInstance);
-      // autoplayStatus.performCheck().then((data) => {
-      //   console.log('autoplay', data);
-      // });
       detachable.player = playerInstance;
       if (IS_DEV) {
         window.player = playerInstance;
