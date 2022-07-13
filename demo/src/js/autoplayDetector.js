@@ -29,7 +29,7 @@ export class AutoplayController {
           this.player.volume = volume;
           this.player.muted = mute;
         })
-        .catch(() => {
+        .catch((e) => {
           return this.checkMutedAutoplaySupport();
         })
         .then(() => {

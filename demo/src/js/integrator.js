@@ -26,6 +26,9 @@ const defaultConfig = {
   debug: IS_DEV,
   // autoplay: true,
   controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
+  volume: 0.5,
+  muted: false,
+  storage: { enabled: false },
   ads: {
     autoplay: true,
     enabled: true,
@@ -182,12 +185,14 @@ function initDom(container) {
     const styleURL = `${HOST}integration.css?cb=${Math.random()}`;
 
     loadStyles(styleURL);
-    loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
-      detachable.player = playerInstance;
-      if (IS_DEV) {
-        window.player = playerInstance;
-      }
-    });
+    setTimeout(() => {
+      loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
+        detachable.player = playerInstance;
+        if (IS_DEV) {
+          window.player = playerInstance;
+        }
+      });
+    }, 5000)
   });
 }
 
