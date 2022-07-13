@@ -185,14 +185,12 @@ function initDom(container) {
     const styleURL = `${HOST}integration.css?cb=${Math.random()}`;
 
     loadStyles(styleURL);
-    setTimeout(() => {
-      loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
-        detachable.player = playerInstance;
-        if (IS_DEV) {
-          window.player = playerInstance;
-        }
-      });
-    }, 5000)
+    loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
+      detachable.player = playerInstance;
+      if (IS_DEV) {
+        window.player = playerInstance;
+      }
+    });
   });
 }
 
