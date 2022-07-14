@@ -2,6 +2,7 @@ const VMAP_OPEN = `<?xml version="1.0" encoding="UTF-8"?><vmap:VMAP xmlns:vmap="
 const VMAP_CLOSE = `</vmap:VMAP>`;
 
 export function createVmap(urlArray) {
+  if(!urlArray) return '';
   const vmapAdBreaks = urlArray.map((url, i) => {
     // language=XML
     return `<vmap:AdBreak timeOffset="start" breakType="linear" breakId="preroll${i}">
