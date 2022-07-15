@@ -542,6 +542,26 @@ class Ads {
     this.player.media.pause();
   };
 
+  pause = () => {
+    if (this.manager && this.playing) {
+      this.manager.pause();
+
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  resume = () => {
+    if (this.manager && this.playing) {
+      this.manager.resume();
+
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   /**
    * Destroy the adsManager so we can grab new ads after this. If we don't then we're not
    * allowed to call new ads based on google policies, as they interpret this as an accidental
@@ -647,6 +667,12 @@ class Ads {
 
       clearTimeout(this.safetyTimer);
       this.safetyTimer = null;
+    }
+  };
+
+  setVolume = (volume) => {
+    if (this.manager) {
+      this.manager.setVolume(volume);
     }
   };
 }
