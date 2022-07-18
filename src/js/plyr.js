@@ -355,18 +355,18 @@ class Plyr {
   /**
    * Play the media, or play the advertisement (if they are not blocked)
    */
-  play = () => {
+  play = (isPaused) => {
     if (!is.function(this.media.play)) {
       return null;
     }
 
-    debugger;
-
     // Intecept play with ads
     if (this.ads && this.ads.enabled) {
-      if (this.ads.playing && this.ads.resume()) {
+      if (this.ads.resume()) {
         return true;
-      } else {
+      }
+
+      if (!isPaused) {
         // returning this promise helps avoiding 1st second of video play before ad
         return this.ads.managerPromise.then(() => this.ads.play()).catch(() => this.media.play());
       }
@@ -425,10 +425,20 @@ class Plyr {
    */
   togglePlay = (input) => {
     // Toggle based on current state if nothing passed
-    const toggle = is.boolean(input) ? input : !this.playing;
+    let toggle = is.boolean(input) ? input : null;
+
+    if (is.boolean(input)) {
+      toggle = input;
+    } else {
+      if (this.ads && this.ads.enabled && this.ads.active) {
+        toggle = !this.ads.playing;
+      } else {
+        toggle = !this.playing;
+      }
+    }
 
     if (toggle) {
-      return this.play();
+      return this.play(true);
     }
 
     return this.pause();
