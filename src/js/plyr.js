@@ -355,15 +355,21 @@ class Plyr {
   /**
    * Play the media, or play the advertisement (if they are not blocked)
    */
-  play = () => {
+  play = (isPaused) => {
     if (!is.function(this.media.play)) {
       return null;
     }
 
     // Intecept play with ads
     if (this.ads && this.ads.enabled) {
-      // returning this promise helps avoiding 1st second of video play before ad
-      return this.ads.managerPromise.then(() => this.ads.play()).catch(() => this.media.play());
+      if (this.ads.resume()) {
+        return true;
+      }
+
+      if (!isPaused) {
+        // returning this promise helps avoiding 1st second of video play before ad
+        return this.ads.managerPromise.then(() => this.ads.play()).catch(() => this.media.play());
+      }
     }
 
     // Return the promise (for HTML5)
@@ -374,6 +380,10 @@ class Plyr {
    * Pause the media
    */
   pause = () => {
+    if (this.ads && this.ads.pause()) {
+      return true;
+    }
+
     if (!this.playing || !is.function(this.media.pause)) {
       return null;
     }
@@ -415,10 +425,20 @@ class Plyr {
    */
   togglePlay = (input) => {
     // Toggle based on current state if nothing passed
-    const toggle = is.boolean(input) ? input : !this.playing;
+    let toggle = is.boolean(input) ? input : null;
+
+    if (is.boolean(input)) {
+      toggle = input;
+    } else {
+      if (this.ads && this.ads.enabled && this.ads.active) {
+        toggle = !this.ads.playing;
+      } else {
+        toggle = !this.playing;
+      }
+    }
 
     if (toggle) {
-      return this.play();
+      return this.play(true);
     }
 
     return this.pause();
@@ -573,6 +593,10 @@ class Plyr {
     // Set the player volume
     this.media.volume = volume;
 
+    if (this.ads) {
+      this.ads.setVolume(volume);
+    }
+
     // If muted, and we're increasing volume manually, reset muted state
     if (!is.empty(value) && this.muted && volume > 0) {
       this.muted = false;
@@ -625,6 +649,14 @@ class Plyr {
 
     // Set mute on the player
     this.media.muted = toggle;
+
+    if (this.ads) {
+      if (toggle) {
+        this.ads.setVolume(0);
+      } else {
+        this.ads.setVolume(this.volume);
+      }
+    }
   }
 
   /**

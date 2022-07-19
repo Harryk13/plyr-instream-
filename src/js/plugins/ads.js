@@ -7,6 +7,7 @@
 /* global google */
 
 import { createElement } from '../utils/elements';
+import ui from '../ui';
 import { on, triggerEvent } from '../utils/events';
 import i18n from '../utils/i18n';
 import is from '../utils/is';
@@ -38,8 +39,10 @@ class Ads {
   constructor(player) {
     this.player = player;
     this.config = player.config.ads;
+    this.active = false;
     this.playing = false;
     this.initialized = false;
+    this.loaded = false;
     this.elements = {
       container: null,
       displayContainer: null,
@@ -54,7 +57,10 @@ class Ads {
     // Setup a promise to resolve when the IMA manager is ready
     this.managerPromise = new Promise((resolve, reject) => {
       // The ad is loaded and ready
-      this.on('loaded', resolve);
+      this.on('loaded', () => {
+        this.loaded = true;
+        resolve();
+      });
 
       // Ads failed
       this.on('error', reject);
@@ -520,9 +526,13 @@ class Ads {
   resumeContent = () => {
     // Hide the advertisement container
     this.elements.container.style.zIndex = '';
+    this.player.elements.progress.style.display = '';
+    this.player.elements.controls.style.zIndex = '';
 
     // Ad is stopped
+    this.active = false;
     this.playing = false;
+    ui.setPlaying(this.player.elements.buttons.play, this.playing);
 
     // Play video
     silencePromise(this.player.media.play());
@@ -534,12 +544,42 @@ class Ads {
   pauseContent = () => {
     // Show the advertisement container
     this.elements.container.style.zIndex = 3;
+    this.player.elements.controls.style.zIndex = 100;
+    this.player.elements.progress.style.display = 'none';
 
     // Ad is playing
+    this.active = true;
     this.playing = true;
+    ui.setPlaying(this.player.elements.buttons.play, this.playing);
 
     // Pause our video.
     this.player.media.pause();
+  };
+
+  pause = () => {
+    if (this.manager && this.active && this.playing) {
+      this.manager.pause();
+      this.playing = false;
+
+      ui.setPlaying(this.player.elements.buttons.play, this.playing);
+
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  resume = () => {
+    if (this.manager && this.active && !this.playing) {
+      this.manager.resume();
+      this.playing = true;
+
+      ui.setPlaying(this.player.elements.buttons.play, this.playing);
+
+      return true;
+    } else {
+      return false;
+    }
   };
 
   /**
@@ -647,6 +687,12 @@ class Ads {
 
       clearTimeout(this.safetyTimer);
       this.safetyTimer = null;
+    }
+  };
+
+  setVolume = (volume) => {
+    if (this.manager) {
+      this.manager.setVolume(volume);
     }
   };
 }
