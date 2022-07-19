@@ -225,10 +225,7 @@ const ui = {
     toggleClass(this.elements.container, this.config.classNames.stopped, this.stopped);
 
     // Set state
-    Array.from(this.elements.buttons.play || []).forEach((target) => {
-      Object.assign(target, { pressed: this.playing });
-      target.setAttribute('aria-label', i18n.get(this.playing ? 'pause' : 'play', this.config));
-    });
+    ui.setPlaying(this.elements.buttons.play, this.playing);
 
     // Only update controls on non timeupdate events
     if (is.event(event) && event.type === 'timeupdate') {
@@ -237,6 +234,13 @@ const ui = {
 
     // Toggle controls
     ui.toggleControls.call(this);
+  },
+
+  setPlaying(buttons, state) {
+    Array.from(buttons || []).forEach((target) => {
+      Object.assign(target, { pressed: state });
+      target.setAttribute('aria-label', i18n.get(this.playing ? 'pause' : 'play', this.config));
+    });
   },
 
   // Check if media is loading
