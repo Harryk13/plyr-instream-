@@ -26,8 +26,8 @@ const defaultConfig = {
   debug: IS_DEV,
   // autoplay: true,
   controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
-  volume: 0.5,
-  muted: false,
+  volume: 0,
+  muted: true,
   storage: { enabled: false },
   ads: {
     autoplay: true,
@@ -72,7 +72,9 @@ function downloadConfig(playListId) {
 function checkAutoplay(player) {
   player.autoPlayController.performCheck().then((result) => {
     if (result.autoplayAllowed) {
-      player.play();
+      player.detachableInstance.hadBecameVisiblePromise.then(() => {
+        player.play();
+      });
     }
   });
 }
@@ -101,7 +103,6 @@ function setToPlay(player, item, config, forcePlay) {
     hls.loadSource(item.sources[0].src);
   } else {
     player.source = item;
-
     if (player.autoPlayController.isChecked && player.autoPlayController.autoplayAllowed || forcePlay) {
       player.play();
     } else {
@@ -187,6 +188,7 @@ function initDom(container) {
     loadStyles(styleURL);
     loadPlayerSrc(videoTag, playerConfig.playlist).then((playerInstance) => {
       detachable.player = playerInstance;
+      playerInstance.detachableInstance = detachable;
       if (IS_DEV) {
         window.player = playerInstance;
       }

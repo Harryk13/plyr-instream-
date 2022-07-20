@@ -1,3 +1,5 @@
+import Defer from './defer';
+
 const DETACH_STATES = {
   init: 0,
   ready: 1,
@@ -17,6 +19,7 @@ class Detachable {
     this.detachPosition = opts.position;
     this.detachSize = opts.size;
     this.player = null;
+    this.hadBecameVisiblePromise = new Defer();
     this.container = container;
     this.currentState = DETACH_STATES.init;
     this.containerPrevStyles = {};
@@ -47,6 +50,9 @@ class Detachable {
     this.becomeVisible();
     this.currentState = DETACH_STATES.closed;
     this.intersectionObserver.unobserve(this.container.parentNode);
+    if (this.player) {
+      this.player.pause();
+    }
   }
 
   intersectionCallback(entries) {
@@ -77,8 +83,15 @@ class Detachable {
       });
     }
     this.restoreContainerSize();
+    if (this.currentState === DETACH_STATES.init) {
+      this.onFirstLook();
+    }
     this.currentState = DETACH_STATES.ready;
     this.resizePlayer();
+  }
+
+  onFirstLook() {
+    this.hadBecameVisiblePromise.resolve();
   }
 
   becomeInvisible() {
