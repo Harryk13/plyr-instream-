@@ -528,6 +528,7 @@ class Ads {
     this.elements.container.style.zIndex = '';
     this.player.elements.progress.style.display = '';
     this.player.elements.controls.style.zIndex = '';
+    this.player.elements.display.currentTime.style.display = '';
 
     // Ad is stopped
     this.active = false;
@@ -546,6 +547,7 @@ class Ads {
     this.elements.container.style.zIndex = 3;
     this.player.elements.controls.style.zIndex = 100;
     this.player.elements.progress.style.display = 'none';
+    this.player.elements.display.currentTime.style.display = 'none';
 
     // Ad is playing
     this.active = true;
